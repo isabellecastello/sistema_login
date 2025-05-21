@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Formulário de Cadastro</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto 0;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
+</head>
+<body>
+    <h1>Formulario</h1>
+    
+    <form id="meuFormulario">
+        <div class="form-group">
+            <label for="matricula">MATRICULA</label>
+            <input type="text" id="matricula" name="matricula">
+        </div>
+        
+        <div class="form-group">
+            <label for="nome">NOME</label>
+            <input type="text" id="nome" name="nome">
+        </div>
+        
+        <div class="form-group">
+            <label for="cep">CEP</label>
+            <input type="text" id="cep" name="cep" value="60829143">
+        </div>
+        
+        <div class="form-group">
+            <label for="endereco">ENO</label>
+            <input type="text" id="endereco" name="endereco">
+        </div>
+        
+        <button type="button" id="botaoOK">OK</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Busca automática do endereço quando o CEP perde o foco
+            document.getElementById('cep').addEventListener('blur', function() {
+                const cep = this.value.replace(/\D/g, '');
+                
+                if (cep.length !== 8) {
+                    return;
+                }
+                
+                fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (!data.erro) {
+                            let endereco = '';
+                            if (data.logradouro) endereco += data.logradouro;
+                            if (data.bairro) endereco += (endereco ? ', ' : '') + data.bairro;
+                            if (data.localidade) endereco += (endereco ? ' - ' : '') + data.localidade;
+                            if (data.uf) endereco += (endereco ? '/' : '') + data.uf;
+                            
+                            document.getElementById('endereco').value = endereco;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Erro ao buscar CEP:', error);
+                    });
+            });
+            
+            // Validação do formulário quando o botão OK é clicado
+            document.getElementById('botaoOK').addEventListener('click', function() {
+                const campos = ['matricula', 'nome', 'cep', 'endereco'];
+                let camposInvalidos = [];
+                
+                campos.forEach(campo => {
+                    const valor = document.getElementById(campo).value.trim();
+                    if (!valor || valor.length < 3) {
+                        camposInvalidos.push(campo.toUpperCase());
+                    }
+                });
+                
+                if (camposInvalidos.length > 0) {
+                    alert(`Os seguintes campos estão inválidos ou têm menos de 3 caracteres:\n\n${camposInvalidos.join('\n')}`);
+                } else {
+                    alert('Formulário válido! Todos os campos estão preenchidos corretamente.');
+                    // Aqui você pode adicionar o código para enviar o formulário
+                    // document.getElementById('meuFormulario').submit();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
